@@ -18,44 +18,63 @@ $tiket = $conn->query("
     ORDER BY c.created_at DESC
 ");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tiket Saya</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
 
-<body class="bg-gray-100">
-<div class="max-w-4xl mx-auto p-6">
+<?php include '../includes/header.php'; ?>
+<?php include '../includes/navbar.php'; ?>
 
-    <h1 class="text-2xl font-bold mb-4">Tiket Saya</h1>
+<section class="pt-32 pb-20 bg-slate-50 min-h-screen">
+    <div class="max-w-5xl mx-auto px-6">
 
-    <?php while ($t = $tiket->fetch_assoc()) { ?>
-        <div class="p-4 bg-white rounded shadow border mb-3">
-            <div class="flex justify-between">
+        <h1 class="text-3xl font-extrabold text-slate-900 mb-10">
+            Tiket Saya
+        </h1>
 
-                <div>
-                    <div class="font-bold text-lg"><?php echo $t['judul']; ?></div>
-                    <div>Kode Tiket: <span class="text-blue-600 font-semibold"><?php echo $t['kode_tiket']; ?></span></div>
-                    <div>Status: <span class="font-semibold"><?php echo $t['status']; ?></span></div>
-                    <div>Waktu: <?php echo formatTanggal($t['created_at']); ?></div>
+        <?php while ($t = $tiket->fetch_assoc()) { ?>
+            <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all mb-6">
 
-                    <?php if ($t['status'] == 'batal') { ?>
-                        <div class="text-red-600">Alasan: <?php echo $t['alasan_batal']; ?></div>
+                <div class="flex justify-between items-start">
+
+                    <div>
+                        <div class="font-bold text-xl text-primary mb-2">
+                            <?php echo $t['judul']; ?>
+                        </div>
+
+                        <div class="mb-1 text-slate-700">
+                            Kode Tiket:
+                            <span class="font-semibold text-blue-600"><?php echo $t['kode_tiket']; ?></span>
+                        </div>
+
+                        <div class="mb-1 text-slate-700">
+                            Status:
+                            <span class="font-semibold text-slate-900"><?php echo $t['status']; ?></span>
+                        </div>
+
+                        <div class="text-slate-600 mb-1">
+                            Waktu: <?php echo formatTanggal($t['created_at']); ?>
+                        </div>
+
+                        <?php if ($t['status'] == 'batal') { ?>
+                            <div class="text-red-600 font-medium mt-2">
+                                Alasan: <?php echo $t['alasan_batal']; ?>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+                    <?php if ($t['status'] === 'pending') { ?>
+                        <form action="../actions/claim_cancel.php" method="POST">
+                            <input type="hidden" name="claim_id" value="<?php echo $t['id']; ?>">
+                            <button class="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-sm">
+                                Batalkan
+                            </button>
+                        </form>
                     <?php } ?>
+
                 </div>
 
-                <?php if ($t['status'] === 'pending') { ?>
-                    <form action="../actions/claim_cancel.php" method="POST">
-                        <input type="hidden" name="claim_id" value="<?php echo $t['id']; ?>">
-                        <button class="px-3 py-2 bg-red-600 text-white rounded">Batalkan</button>
-                    </form>
-                <?php } ?>
-
             </div>
-        </div>
-    <?php } ?>
+        <?php } ?>
 
-</div>
-</body>
-</html>
+    </div>
+</section>
+
+<?php include '../includes/footer.php'; ?>

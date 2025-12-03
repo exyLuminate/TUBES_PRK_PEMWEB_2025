@@ -24,44 +24,55 @@ $pending = $conn->query("
     WHERE c.mahasiswa_id='$uid' AND c.status='pending'
 ");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard Mahasiswa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
 
-<body class="bg-gray-100">
-<div class="max-w-4xl mx-auto p-6">
+<?php include '../includes/header.php'; ?>
+<?php include '../includes/navbar.php'; ?>
 
-    <h1 class="text-2xl font-bold mb-4">Dashboard Mahasiswa</h1>
+<section class="pt-32 pb-20 bg-gradient-to-br from-green-50 via-white to-slate-100 min-h-screen">
+    <div class="max-w-5xl mx-auto px-6">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="p-4 bg-white shadow rounded">
-            <h2 class="font-semibold">Klaim Hari Ini</h2>
-            <p class="text-3xl font-bold text-green-600"><?php echo $limit; ?>/2</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 mb-10">
+            Dashboard Mahasiswa
+        </h1>
+
+        <!-- CARD SUMMARY -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+
+            <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-lg transition-all">
+                <h2 class="font-semibold text-slate-700 mb-2">Klaim Hari Ini</h2>
+                <p class="text-4xl font-bold text-green-600"><?php echo $limit; ?>/2</p>
+            </div>
+
+            <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-lg transition-all">
+                <h2 class="font-semibold text-slate-700 mb-2">Tiket Pending</h2>
+                <p class="text-4xl font-bold text-blue-600"><?php echo $pending->num_rows; ?></p>
+            </div>
         </div>
 
-        <div class="p-4 bg-white shadow rounded">
-            <h2 class="font-semibold">Tiket Pending</h2>
-            <p class="text-3xl font-bold text-blue-600"><?php echo $pending->num_rows; ?></p>
-        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-4">Tiket Aktif</h2>
+
+        <?php if ($pending->num_rows == 0) { ?>
+            <p class="text-slate-600 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                Tidak ada tiket pending.
+            </p>
+        <?php } ?>
+
+        <?php while ($t = $pending->fetch_assoc()) { ?>
+            <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all mb-4">
+                <div class="font-bold text-lg text-primary mb-2"><?php echo $t['judul']; ?></div>
+
+                <div class="text-slate-700 mb-1">
+                    Kode Tiket:
+                    <span class="font-semibold text-blue-600"><?php echo $t['kode_tiket']; ?></span>
+                </div>
+
+                <div class="text-slate-600">
+                    Dibuat: <?php echo formatTanggal($t['created_at']); ?>
+                </div>
+            </div>
+        <?php } ?>
+
     </div>
+</section>
 
-    <h2 class="text-xl font-semibold mb-3">Tiket Aktif</h2>
-
-    <?php if ($pending->num_rows == 0) { ?>
-        <p class="text-gray-600">Tidak ada tiket pending.</p>
-    <?php } ?>
-
-    <?php while ($t = $pending->fetch_assoc()) { ?>
-        <div class="p-4 bg-white rounded shadow border mb-3">
-            <div class="font-bold text-lg"><?php echo $t['judul']; ?></div>
-            <div>Kode Tiket: <span class="font-semibold text-blue-600"><?php echo $t['kode_tiket']; ?></span></div>
-            <div>Dibuat: <?php echo formatTanggal($t['created_at']); ?></div>
-        </div>
-    <?php } ?>
-
-</div>
-</body>
-</html>
+<?php include '../includes/footer.php'; ?>
