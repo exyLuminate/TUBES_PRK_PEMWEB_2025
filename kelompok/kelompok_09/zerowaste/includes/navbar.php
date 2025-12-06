@@ -14,10 +14,13 @@ $role = $_SESSION['role'] ?? '';
             </div>
 
             <ul class="flex flex-col md:flex-row md:items-center gap-y-3 md:gap-y-0 md:gap-x-6 list-none p-0 m-0">
-                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="#hero">Beranda</a></li>
-                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="#how-it-works">Cara Kerja</a></li>
-                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="#features">Misi Kami</a></li>
-                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="#faq">FAQ</a></li>
+    
+                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="index.php">Beranda</a></li>
+                
+                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="index.php#how-it-works">Cara Kerja</a></li>
+                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="index.php#features">Misi Kami</a></li>
+                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="index.php#faq">FAQ</a></li>
+                <li><a class="text-slate-600 font-medium hover:text-primary transition" href="catalog.php">Cari Makanan</a></li>
                 
                 <li class="md:ml-4 mt-2 md:mt-0">
                     <?php if (!$is_logged_in): ?>
