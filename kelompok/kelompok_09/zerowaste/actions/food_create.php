@@ -17,22 +17,16 @@ $lokasi      = trim($_POST['lokasi_pickup'] ?? '');
 $raw_batas   = $_POST['batas_waktu'] ?? '';
 $jenis       = $_POST['jenis_makanan'] ?? 'halal';
 
-// Convert datetime-local (2025-12-07T10:30) ke DATETIME MySQL (2025-12-07 10:30:00)
 $batas_waktu = '';
 if ($raw_batas !== '') {
     $batas_waktu = str_replace('T', ' ', $raw_batas) . ':00';
 }
 
-// Validasi input dasar
-if (
-    $judul === '' || $category_id <= 0 || $jumlah_awal <= 0 ||
-    $lokasi === '' || $batas_waktu === ''
-) {
-    header("Location: ../donatur/add_food.php?status=error");
+if ($judul === '' || $category_id <= 0 || $jumlah_awal <= 0 || $lokasi === '' || $batas_waktu === '') {
+    header("Location: ../donatur/add_food.php?status=error&msg=Data tidak lengkap");
     exit();
 }
 
-// Proses upload foto (wajib)
 $foto_path = null;
 
 if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
@@ -40,59 +34,44 @@ if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
     $name = basename($_FILES['foto']['name']);
     $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
-    // (Opsional) batasi ekstensi
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
     if (!in_array($ext, $allowed)) {
-        header("Location: ../donatur/add_food.php?status=error");
+        header("Location: ../donatur/add_food.php?status=error&msg=Format gambar salah");
         exit();
     }
 
-    $newName   = 'food_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
-    $uploadDir = '../images/foods/';
+    $newName = 'food_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
+    
+    $uploadDir = '../uploads/food_images/';
 
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0775, true);
+        mkdir($uploadDir, 0777, true);
     }
 
     $dest = $uploadDir . $newName;
 
     if (move_uploaded_file($tmp, $dest)) {
-        // Simpan path relatif (tanpa ../) ke DB
-        $foto_path = 'images/foods/' . $newName;
+       
+        $foto_path = $newName; 
     }
 }
 
-// Kalau gagal upload, kirim balik error
 if ($foto_path === null) {
-    header("Location: ../donatur/add_food.php?status=error");
+    header("Location: ../donatur/add_food.php?status=error&msg=Gagal upload gambar");
     exit();
 }
 
-// Insert ke database
-$sql = "
-    INSERT INTO food_stocks
-    (donatur_id, category_id, judul, deskripsi, foto_path,
-     jumlah_awal, stok_tersedia, lokasi_pickup, batas_waktu, jenis_makanan, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'tersedia')
-";
+$sql = "INSERT INTO food_stocks 
+        (donatur_id, category_id, judul, deskripsi, foto_path, jumlah_awal, stok_tersedia, lokasi_pickup, batas_waktu, jenis_makanan, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'tersedia')";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param(
-    "iisssiisss",
-    $donatur_id,
-    $category_id,
-    $judul,
-    $deskripsi,
-    $foto_path,
-    $jumlah_awal,
-    $jumlah_awal,
-    $lokasi,
-    $batas_waktu,
-    $jenis
-);
+$stmt->bind_param("iisssiisss", $donatur_id, $category_id, $judul, $deskripsi, $foto_path, $jumlah_awal, $jumlah_awal, $lokasi, $batas_waktu, $jenis);
 
 if ($stmt->execute()) {
     header("Location: ../donatur/manage_food.php?status=created");
 } else {
-    header("Location: ../donatur/add_food.php?status=error");
+    header("Location: ../donatur/add_food.php?status=error&msg=Database error");
 }
 exit();
+?>
