@@ -20,7 +20,7 @@ if ($q != '') {
 }
 
 
-if ($jenis != '' && $jenis != 'semua') { /
+if ($jenis != '' && $jenis != 'semua') { 
     $sql .= " AND fs.jenis_makanan = '$jenis'";
 }
 
