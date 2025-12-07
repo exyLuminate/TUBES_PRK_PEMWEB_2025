@@ -1,20 +1,19 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['role'] = 'donatur';
-    $_SESSION['nama_lengkap'] = 'Testing Donatur';
-}
-
-if ($_SESSION['role'] !== 'donatur') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
     header("Location: ../login.php");
     exit();
 }
 
 require_once '../config/database.php';
 
-$categories = $conn->query("SELECT id, nama_kategori FROM categories WHERE deleted_at IS NULL OR deleted_at IS NULL");
+// Perbaiki query kategori
+$categories = $conn->query("
+    SELECT id, nama_kategori 
+    FROM categories 
+    WHERE deleted_at IS NULL
+");
 
 include '../includes/header.php';
 include '../includes/navbar_dashboard.php';
@@ -28,13 +27,9 @@ include '../includes/navbar_dashboard.php';
             <div class="bg-white p-6 rounded-lg shadow-sm border max-w-2xl">
                 <h1 class="text-2xl font-bold mb-4">Tambah Donasi</h1>
 
-                <?php if (isset($_GET['status']) && $_GET['status'] === 'success'): ?>
-                    <div class="mb-4 text-sm text-green-700 bg-green-100 border px-3 py-2 rounded">
-                        Donasi berhasil ditambahkan.
-                    </div>
-                <?php elseif (isset($_GET['status']) && $_GET['status'] === 'error'): ?>
+                <?php if (isset($_GET['status']) && $_GET['status'] === 'error'): ?>
                     <div class="mb-4 text-sm text-red-700 bg-red-100 border px-3 py-2 rounded">
-                        Terjadi kesalahan. Coba lagi.
+                        Terjadi kesalahan. Pastikan semua data sudah diisi dengan benar.
                     </div>
                 <?php endif; ?>
 
@@ -50,7 +45,9 @@ include '../includes/navbar_dashboard.php';
                         <select name="category_id" class="w-full border rounded px-3 py-2 text-sm" required>
                             <option value="">Pilih Kategori</option>
                             <?php while ($cat = $categories->fetch_assoc()): ?>
-                                <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['nama_kategori']); ?></option>
+                                <option value="<?= $cat['id']; ?>">
+                                    <?= htmlspecialchars($cat['nama_kategori']); ?>
+                                </option>
                             <?php endwhile; ?>
                         </select>
                     </div>

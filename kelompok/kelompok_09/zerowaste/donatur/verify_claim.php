@@ -1,13 +1,8 @@
 <?php 
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['role'] = 'donatur';  
-    $_SESSION['nama_lengkap'] = 'Testing Donatur';
-}
-
-if ($_SESSION['role'] !== 'donatur') {
+// Production: pakai session asli dari login
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
     header("Location: ../login.php");
     exit();
 }
@@ -28,19 +23,19 @@ include '../includes/navbar_dashboard.php';
                 <?php if (isset($_GET['status'])): ?>
                     <?php if ($_GET['status'] === 'success'): ?>
                         <div class="mb-4 text-sm text-green-700 bg-green-100 border px-3 py-2 rounded">
-                            Berhasil diverifikasi.
+                            ✅ Tiket berhasil diverifikasi. Silakan serahkan makanan ke mahasiswa.
                         </div>
                     <?php elseif ($_GET['status'] === 'notfound'): ?>
                         <div class="mb-4 text-sm text-red-700 bg-red-100 border px-3 py-2 rounded">
-                            Kode tiket tidak ditemukan.
+                            ❌ Kode tiket tidak ditemukan atau bukan milik donasi Anda.
                         </div>
-                    <?php elseif ($_GET['status'] === 'stock'): ?>
+                    <?php elseif ($_GET['status'] === 'invalid'): ?>
                         <div class="mb-4 text-sm text-yellow-800 bg-yellow-100 border px-3 py-2 rounded">
-                            Stok sudah habis.
+                            ⚠️ Tiket ini sudah tidak valid (sudah diambil / dibatalkan / expired).
                         </div>
                     <?php else: ?>
                         <div class="mb-4 text-sm text-red-700 bg-red-100 border px-3 py-2 rounded">
-                            Terjadi kesalahan.
+                            Terjadi kesalahan saat memproses verifikasi. Coba lagi.
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -49,11 +44,12 @@ include '../includes/navbar_dashboard.php';
                     <div>
                         <label class="block text-sm font-medium mb-1">Kode Tiket</label>
                         <input type="text" name="kode_tiket" required
-                            class="w-full border rounded px-3 py-2 text-sm">
+                            class="w-full border rounded px-3 py-2 text-sm"
+                            placeholder="Contoh: FR-ABC123">
                     </div>
 
                     <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white text-sm rounded">
+                        class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
                         Verifikasi Pengambilan
                     </button>
                 </form>

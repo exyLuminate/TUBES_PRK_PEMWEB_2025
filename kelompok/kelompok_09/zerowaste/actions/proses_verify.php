@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// 1. Pastikan user adalah donatur yang login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
     header("Location: ../login.php");
     exit();
@@ -8,55 +9,57 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
 
 require_once '../config/database.php';
 
-$kode = $_POST['kode_tiket'] ?? '';
-$donatur = $_SESSION['user_id'];
+$kode = trim($_POST['kode_tiket'] ?? '');
+$donatur_id = $_SESSION['user_id'];
 
+// 2. Validasi input
 if ($kode === '') {
     header("Location: ../donatur/verify_claim.php?status=error");
     exit();
 }
 
+// 3. Cek klaim berdasarkan kode tiket & kepemilikan donatur
 $sql = "
-    SELECT c.id AS claim_id, c.food_id, f.stok_tersedia
+    SELECT c.id, c.status
     FROM claims c
     JOIN food_stocks f ON c.food_id = f.id
-    WHERE c.kode_tiket = ? AND c.status = 'pending' AND f.donatur_id = ?
+    WHERE c.kode_tiket = ? AND f.donatur_id = ?
     LIMIT 1
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('si', $kode, $donatur);
+$stmt->bind_param("si", $kode, $donatur_id);
 $stmt->execute();
-$res = $stmt->get_result();
+$result = $stmt->get_result();
+$claim = $result->fetch_assoc();
 
-if ($res->num_rows === 0) {
+if (!$claim) {
+    // Kode tidak ditemukan atau bukan milik donatur ini
     header("Location: ../donatur/verify_claim.php?status=notfound");
     exit();
 }
 
-$d = $res->fetch_assoc();
-
-if ($d['stok_tersedia'] <= 0) {
-    header("Location: ../donatur/verify_claim.php?status=stock");
+// 4. Cek status klaim
+if ($claim['status'] === 'diambil') {
+    // Sudah pernah diverifikasi
+    header("Location: ../donatur/verify_claim.php?status=invalid");
     exit();
 }
 
-$conn->begin_transaction();
+if ($claim['status'] === 'batal' || $claim['status'] === 'expired') {
+    // Klaim sudah tidak berlaku
+    header("Location: ../donatur/verify_claim.php?status=invalid");
+    exit();
+}
 
-$u1 = $conn->prepare("UPDATE claims SET status='diambil', verified_at=NOW() WHERE id=?");
-$u1->bind_param('i', $d['claim_id']);
-$u1->execute();
+// 5. Update status klaim saja (stok sudah dikurangi saat mahasiswa klaim)
+$now = date('Y-m-d H:i:s');
+$update = $conn->prepare("UPDATE claims SET status = 'diambil', verified_at = ? WHERE id = ?");
+$update->bind_param("si", $now, $claim['id']);
 
-$u2 = $conn->prepare("
-    UPDATE food_stocks 
-    SET stok_tersedia = stok_tersedia - 1,
-        status = CASE WHEN stok_tersedia - 1 <= 0 THEN 'habis' ELSE status END
-    WHERE id=?
-");
-$u2->bind_param('i', $d['food_id']);
-$u2->execute();
-
-$conn->commit();
-
-header("Location: ../donatur/verify_claim.php?status=success");
+if ($update->execute()) {
+    header("Location: ../donatur/verify_claim.php?status=success");
+} else {
+    header("Location: ../donatur/verify_claim.php?status=error");
+}
 exit();

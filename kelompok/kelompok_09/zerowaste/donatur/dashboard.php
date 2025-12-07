@@ -1,11 +1,6 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['role'] = 'donatur';
-    $_SESSION['nama_lengkap'] = 'Testing Donatur';
-}
 
 if ($_SESSION['role'] !== 'donatur') {
     header("Location: ../login.php");
