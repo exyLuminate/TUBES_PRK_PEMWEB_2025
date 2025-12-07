@@ -1,7 +1,7 @@
 <?php 
 session_start();
 
-// Production: pakai session asli dari login
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
     header("Location: ../login.php");
     exit();
@@ -40,7 +40,7 @@ include '../includes/navbar_dashboard.php';
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <form action="../actions/process_verify.php" method="POST" class="space-y-4">
+                <form action="../actions/proses_verify.php" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Kode Tiket</label>
                         <input type="text" name="kode_tiket" required

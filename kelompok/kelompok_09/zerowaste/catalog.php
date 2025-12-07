@@ -67,8 +67,7 @@ include 'includes/navbar.php';
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="foodContainer">
                 
                 <?php
-                // TAMPILAN AWAL (PHP Load Pertama Kali)
-                // Tetap pakai PHP untuk load pertama biar SEO friendly & tidak kosong saat loading JS
+                
                 $sql = "SELECT fs.*, u.nama_lengkap as donatur 
                           FROM food_stocks fs 
                           JOIN users u ON fs.donatur_id = u.id 
@@ -81,7 +80,7 @@ include 'includes/navbar.php';
 
                 if(mysqli_num_rows($result) > 0):
                     while($row = mysqli_fetch_assoc($result)):
-                        // Logic Sisa Waktu PHP
+                       
                         $batas = new DateTime($row['batas_waktu']);
                         $sekarang = new DateTime();
                         $interval = $sekarang->diff($batas);

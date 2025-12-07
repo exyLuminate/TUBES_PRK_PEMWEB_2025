@@ -1,12 +1,12 @@
 <?php
 require '../config/database.php';
 
-// 1. Tangkap Parameter Filter dari JS
+
 $q = isset($_GET['q']) ? mysqli_real_escape_string($conn, $_GET['q']) : '';
 $jenis = isset($_GET['jenis']) ? $_GET['jenis'] : '';
 $cat = isset($_GET['cat']) ? $_GET['cat'] : []; 
 
-// 2. Bangun Query (Sama seperti di catalog.php)
+
 $sql = "SELECT fs.*, u.nama_lengkap as donatur 
         FROM food_stocks fs 
         JOIN users u ON fs.donatur_id = u.id 
@@ -14,19 +14,19 @@ $sql = "SELECT fs.*, u.nama_lengkap as donatur
         AND fs.stok_tersedia > 0 
         AND fs.batas_waktu > NOW()";
 
-// Filter Nama
+
 if ($q != '') {
     $sql .= " AND fs.judul LIKE '%$q%'";
 }
 
-// Filter Jenis (Halal/Non)
-if ($jenis != '' && $jenis != 'semua') { // 'semua' adalah value default
+
+if ($jenis != '' && $jenis != 'semua') { /
     $sql .= " AND fs.jenis_makanan = '$jenis'";
 }
 
-// Filter Kategori (Checkbox)
+
 if (!empty($cat)) {
-    // Ubah array [1,2] jadi string "1,2"
+    
     $cats_id = implode(",", array_map('intval', $cat)); 
     if(!empty($cats_id)) {
         $sql .= " AND fs.category_id IN ($cats_id)";
@@ -36,14 +36,14 @@ if (!empty($cat)) {
 $sql .= " ORDER BY fs.created_at DESC";
 $result = mysqli_query($conn, $sql);
 
-// 3. Output HTML Kartu Makanan
+
 if(mysqli_num_rows($result) > 0):
     while($row = mysqli_fetch_assoc($result)):
         $batas = new DateTime($row['batas_waktu']);
         $sekarang = new DateTime();
         $interval = $sekarang->diff($batas);
         
-        // Logic Sisa Waktu
+        
         if ($sekarang > $batas) {
             $sisa_waktu = "Expired";
         } else {

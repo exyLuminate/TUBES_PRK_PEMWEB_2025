@@ -3,7 +3,7 @@
         <ul class="space-y-2 font-medium">
             
             <?php 
-            // Ambil role dari session, default ke 'guest' jika belum login
+        
             $role = $_SESSION['role'] ?? 'guest'; 
             ?>
 

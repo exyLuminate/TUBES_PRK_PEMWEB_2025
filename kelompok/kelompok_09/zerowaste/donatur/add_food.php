@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'donatur') {
 
 require_once '../config/database.php';
 
-// Perbaiki query kategori
+
 $categories = $conn->query("
     SELECT id, nama_kategori 
     FROM categories 

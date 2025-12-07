@@ -95,7 +95,6 @@ include '../includes/navbar_dashboard.php';
                                     </td>
                                     <td class="py-2 px-2"><?= htmlspecialchars($row['batas_waktu']); ?></td>
                                     <td class="py-2 px-2 space-x-2">
-                                       <?= $row['id']; ?>" class="text-blue-600 text-xs hover:underline">Edit</a> -->
                                         <a href="../actions/food_delete.php?id=<?= $row['id']; ?>"
                                            class="text-red-600 text-xs hover:underline"
                                            onclick="return confirm('Yakin ingin menghapus donasi ini?');">
