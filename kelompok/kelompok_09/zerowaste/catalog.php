@@ -1,5 +1,9 @@
 <?php 
 session_start();
+
+// 1. SET TIMEZONE WAJIB (Agar jam sesuai WIB, tidak selisih 7 jam)
+date_default_timezone_set('Asia/Jakarta');
+
 include 'config/database.php'; 
 include 'includes/header.php';
 include 'includes/navbar.php';
@@ -83,6 +87,7 @@ include 'includes/navbar.php';
                         $batas = new DateTime($row['batas_waktu']);
                         $sekarang = new DateTime();
                         
+                        // Logic Waktu
                         if ($sekarang > $batas) {
                             $sisa_waktu = 'Expired';
                             $warna_waktu = 'text-gray-400';
@@ -93,11 +98,11 @@ include 'includes/navbar.php';
                                 $sisa_waktu = $interval->d . ' Hari lagi';
                                 $warna_waktu = 'text-green-600';
                             } elseif ($interval->h > 0) {
-                                $sisa_waktu = $interval->h . ' Jam lagi';
+                                $sisa_waktu = $interval->h . ' Jam ' . $interval->i . ' Menit';
                                 $warna_waktu = 'text-orange-500';
                             } else {
                                 $sisa_waktu = $interval->i . ' Menit lagi';
-                                $warna_waktu = 'text-red-600'; 
+                                $warna_waktu = 'text-red-600';
                             }
                         }
                 ?>
