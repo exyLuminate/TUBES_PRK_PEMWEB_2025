@@ -67,7 +67,6 @@ include 'includes/navbar.php';
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="foodContainer">
                 
                 <?php
-                
                 $sql = "SELECT fs.*, u.nama_lengkap as donatur 
                           FROM food_stocks fs 
                           JOIN users u ON fs.donatur_id = u.id 
@@ -80,11 +79,27 @@ include 'includes/navbar.php';
 
                 if(mysqli_num_rows($result) > 0):
                     while($row = mysqli_fetch_assoc($result)):
-                       
+                        
                         $batas = new DateTime($row['batas_waktu']);
                         $sekarang = new DateTime();
-                        $interval = $sekarang->diff($batas);
-                        $sisa_waktu = ($sekarang > $batas) ? 'Expired' : (($interval->h > 0) ? $interval->format('%h Jam lagi') : $interval->format('%i Menit lagi'));
+                        
+                        if ($sekarang > $batas) {
+                            $sisa_waktu = 'Expired';
+                            $warna_waktu = 'text-gray-400';
+                        } else {
+                            $interval = $sekarang->diff($batas);
+                            
+                            if ($interval->d > 0) {
+                                $sisa_waktu = $interval->d . ' Hari lagi';
+                                $warna_waktu = 'text-green-600';
+                            } elseif ($interval->h > 0) {
+                                $sisa_waktu = $interval->h . ' Jam lagi';
+                                $warna_waktu = 'text-orange-500';
+                            } else {
+                                $sisa_waktu = $interval->i . ' Menit lagi';
+                                $warna_waktu = 'text-red-600'; 
+                            }
+                        }
                 ?>
                 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group">
@@ -106,7 +121,10 @@ include 'includes/navbar.php';
                             <i class="bi bi-person-circle"></i> <?= $row['donatur'] ?>
                         </p>
                         <div class="flex justify-between items-center text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
-                            <div class="flex flex-col"><span class="text-xs text-gray-400">Batas Waktu</span><span class="font-semibold text-red-500"><?= $sisa_waktu ?></span></div>
+                            <div class="flex flex-col">
+                                <span class="text-xs text-gray-400">Batas Waktu</span>
+                                <span class="font-semibold <?= $warna_waktu ?>"><?= $sisa_waktu ?></span>
+                            </div>
                             <div class="flex flex-col text-right"><span class="text-xs text-gray-400">Lokasi</span><span class="font-semibold truncate w-24 block text-right"><?= $row['lokasi_pickup'] ?></span></div>
                         </div>
                         <a href="food_detail.php?id=<?= $row['id'] ?>" class="block w-full bg-green-50 text-green-700 text-center py-2.5 rounded-lg font-bold hover:bg-green-600 hover:text-white transition border border-green-200">Lihat Detail</a>

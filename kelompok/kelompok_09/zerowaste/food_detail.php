@@ -30,8 +30,26 @@ if (!$data) {
 
 $batas = new DateTime($data['batas_waktu']);
 $sekarang = new DateTime();
-$is_expired = $sekarang > $batas;
-$sisa_waktu = $is_expired ? 'Sudah Berakhir' : $sekarang->diff($batas)->format('%h Jam %i Menit lagi');
+
+if ($sekarang > $batas) {
+    $sisa_waktu = 'Sudah Berakhir';
+    $is_expired = true;
+    $warna_waktu = 'text-gray-500';
+} else {
+    $is_expired = false;
+    $interval = $sekarang->diff($batas);
+    
+    if ($interval->d > 0) {
+        $sisa_waktu = $interval->d . ' Hari lagi';
+        $warna_waktu = 'text-green-600';
+    } elseif ($interval->h > 0) {
+        $sisa_waktu = $interval->h . ' Jam lagi';
+        $warna_waktu = 'text-orange-500';
+    } else {
+        $sisa_waktu = $interval->i . ' Menit lagi';
+        $warna_waktu = 'text-red-600';
+    }
+}
 ?>
 
 <div class="container mx-auto px-4 py-12 min-h-screen">
@@ -63,7 +81,7 @@ $sisa_waktu = $is_expired ? 'Sudah Berakhir' : $sekarang->diff($batas)->format('
                         <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                             Stok: <?= $data['stok_tersedia'] ?> Porsi
                         </span>
-                        <span class="text-sm text-red-500 font-semibold flex items-center gap-1">
+                        <span class="text-sm <?= $warna_waktu ?> font-semibold flex items-center gap-1">
                             <i class="bi bi-clock-history"></i> <?= $sisa_waktu ?>
                         </span>
                     </div>

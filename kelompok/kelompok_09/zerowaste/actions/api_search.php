@@ -1,11 +1,9 @@
 <?php
 require '../config/database.php';
 
-
 $q = isset($_GET['q']) ? mysqli_real_escape_string($conn, $_GET['q']) : '';
 $jenis = isset($_GET['jenis']) ? $_GET['jenis'] : '';
 $cat = isset($_GET['cat']) ? $_GET['cat'] : []; 
-
 
 $sql = "SELECT fs.*, u.nama_lengkap as donatur 
         FROM food_stocks fs 
@@ -14,19 +12,15 @@ $sql = "SELECT fs.*, u.nama_lengkap as donatur
         AND fs.stok_tersedia > 0 
         AND fs.batas_waktu > NOW()";
 
-
 if ($q != '') {
     $sql .= " AND fs.judul LIKE '%$q%'";
 }
-
 
 if ($jenis != '' && $jenis != 'semua') { 
     $sql .= " AND fs.jenis_makanan = '$jenis'";
 }
 
-
 if (!empty($cat)) {
-    
     $cats_id = implode(",", array_map('intval', $cat)); 
     if(!empty($cats_id)) {
         $sql .= " AND fs.category_id IN ($cats_id)";
@@ -36,21 +30,26 @@ if (!empty($cat)) {
 $sql .= " ORDER BY fs.created_at DESC";
 $result = mysqli_query($conn, $sql);
 
-
 if(mysqli_num_rows($result) > 0):
     while($row = mysqli_fetch_assoc($result)):
         $batas = new DateTime($row['batas_waktu']);
         $sekarang = new DateTime();
-        $interval = $sekarang->diff($batas);
-        
         
         if ($sekarang > $batas) {
-            $sisa_waktu = "Expired";
+            $sisa_waktu = 'Expired';
+            $warna_waktu = 'text-gray-400';
         } else {
-            if ($interval->h > 0) {
-                $sisa_waktu = $interval->format('%h Jam lagi');
+            $interval = $sekarang->diff($batas);
+            
+            if ($interval->d > 0) {
+                $sisa_waktu = $interval->d . ' Hari lagi';
+                $warna_waktu = 'text-green-600';
+            } elseif ($interval->h > 0) {
+                $sisa_waktu = $interval->h . ' Jam lagi';
+                $warna_waktu = 'text-orange-500';
             } else {
-                $sisa_waktu = $interval->format('%i Menit lagi');
+                $sisa_waktu = $interval->i . ' Menit lagi';
+                $warna_waktu = 'text-red-600';
             }
         }
 ?>
@@ -76,7 +75,7 @@ if(mysqli_num_rows($result) > 0):
             <div class="flex justify-between items-center text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
                 <div class="flex flex-col">
                     <span class="text-xs text-gray-400">Batas Waktu</span>
-                    <span class="font-semibold text-red-500"><?= $sisa_waktu ?></span>
+                    <span class="font-semibold <?= $warna_waktu ?>"><?= $sisa_waktu ?></span>
                 </div>
                 <div class="flex flex-col text-right">
                     <span class="text-xs text-gray-400">Lokasi</span>
@@ -94,9 +93,11 @@ if(mysqli_num_rows($result) > 0):
     endwhile; 
 else: 
 ?>
-    <div class="col-span-full text-center py-12">
-        <img src="assets/images/empty_state.svg" alt="Kosong" class="w-48 h-48 mx-auto opacity-50 mb-4">
+    <div class="col-span-full text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4 text-gray-400">
+            <i class="fas fa-search text-4xl"></i>
+        </div>
         <h3 class="text-xl font-bold text-gray-600">Tidak ditemukan :(</h3>
-        <p class="text-gray-500">Coba ganti kata kunci lain.</p>
+        <p class="text-gray-500 mt-2">Coba ganti kata kunci atau filter lainnya.</p>
     </div>
 <?php endif; ?>
