@@ -25,6 +25,7 @@ if ($q != '') {
     $sql .= " AND fs.judul LIKE '%$q%'";
 }
 
+
 if ($jenis != '' && $jenis != 'semua') { 
     $sql .= " AND fs.jenis_makanan = '$jenis'";
 }

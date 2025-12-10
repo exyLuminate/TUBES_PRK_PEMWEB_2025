@@ -20,15 +20,27 @@ $stmt->execute();
 $limit = $stmt->get_result()->fetch_assoc()['total'];
 
 
-$pending_query = "SELECT c.*, f.judul 
-                  FROM claims c 
-                  JOIN food_stocks f ON f.id = c.food_id 
+$pending_query = "SELECT c.*, f.judul
+                  FROM claims c
+                  JOIN food_stocks f ON f.id = c.food_id
                   WHERE c.mahasiswa_id=? AND c.status='pending'
                   ORDER BY c.created_at DESC";
 $stmt = $conn->prepare($pending_query);
 $stmt->bind_param("i", $uid);
 $stmt->execute();
 $pending = $stmt->get_result();
+
+
+$history_query = "SELECT c.*, f.judul
+                  FROM claims c
+                  JOIN food_stocks f ON f.id = c.food_id
+                  WHERE c.mahasiswa_id=? AND c.status IN('diambil', 'batal', 'expired')
+                  ORDER BY c.created_at DESC
+                  LIMIT 5";
+$stmt = $conn->prepare($history_query);
+$stmt->bind_param("i", $uid);
+$stmt->execute();
+$history = $stmt->get_result();
 
 
 include '../includes/header.php';
@@ -57,8 +69,12 @@ include '../includes/navbar_dashboard.php';
                     <div class="relative z-10">
                         <h2 class="text-gray-500 font-bold text-xs uppercase tracking-wide mb-1">Limit Klaim Hari Ini</h2>
                         <div class="flex items-baseline gap-1">
-                            <span class="text-3xl font-extrabold text-green-600"><?= $limit ?></span>
-                            <span class="text-gray-400 font-medium">/ 2</span>
+                            <?php if ($limit >= 2): ?>
+                                <span class="text-3xl font-extrabold text-red-600">Kuota Habis</span>
+                            <?php else: ?>
+                                <span class="text-3xl font-extrabold text-green-600"><?= $limit ?></span>
+                                <span class="text-gray-400 font-medium">/ 2</span>
+                            <?php endif; ?>
                         </div>
                         <p class="text-xs text-gray-400 mt-2">Reset setiap jam 00:00</p>
                     </div>
@@ -113,6 +129,10 @@ include '../includes/navbar_dashboard.php';
                                             </span>
                                             <span><i class="far fa-clock mr-1"></i> <?= formatTanggal($t['created_at']) ?></span>
                                         </div>
+                                        <p class="text-sm text-orange-600 font-semibold mt-1">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Ambil Sebelum Pukul: <?= date('H:i', strtotime($t['created_at']) + 3600) ?>
+                                        </p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <a href="my_tickets.php" class="w-full md:w-auto text-center px-4 py-2 bg-gray-100 text-gray-600 font-bold rounded-lg hover:bg-gray-200 transition text-sm">
@@ -125,6 +145,38 @@ include '../includes/navbar_dashboard.php';
                     <?php endif; ?>
                 </div>
             </div>
+
+            <!-- Riwayat Terakhir Section -->
+            <?php if ($history->num_rows > 0): ?>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <h2 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-history text-purple-500"></i> Riwayat Terakhir
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        <?php while ($h = $history->fetch_assoc()): ?>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800"><?= htmlspecialchars($h['judul']) ?></p>
+                                        <p class="text-xs text-gray-500">
+                                            <i class="far fa-clock mr-1"></i> <?= formatTanggal($h['created_at']) ?> •
+                                            <span class="capitalize"><?= $h['status'] ?></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                    <?= htmlspecialchars($h['kode_tiket']) ?>
+                                </span>
+                            </div>
+                        <?php endwhile; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
         </main>
         
