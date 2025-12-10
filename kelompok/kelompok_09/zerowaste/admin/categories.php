@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 require_once '../config/database.php';
 require_once '../config/functions.php';
 
-// Handle Actions
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nama_kategori = trim($_POST['nama_kategori']);
         
         if (!empty($nama_kategori)) {
-            // Check for duplicate category name (case-insensitive)
+            
             $check_stmt = mysqli_prepare($conn, "SELECT id FROM categories WHERE LOWER(nama_kategori) = LOWER(?) AND deleted_at IS NULL");
             mysqli_stmt_bind_param($check_stmt, "s", $nama_kategori);
             mysqli_stmt_execute($check_stmt);
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nama_kategori = trim($_POST['nama_kategori']);
         
         if (!empty($nama_kategori)) {
-            // Check for duplicate category name (exclude current category)
+            
             $check_stmt = mysqli_prepare($conn, "SELECT id FROM categories WHERE LOWER(nama_kategori) = LOWER(?) AND id != ? AND deleted_at IS NULL");
             mysqli_stmt_bind_param($check_stmt, "si", $nama_kategori, $id);
             mysqli_stmt_execute($check_stmt);
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'delete') {
         $id = (int)$_POST['id'];
         
-        // Check if category is being used by food_stocks
+       
         $check_usage = mysqli_prepare($conn, "SELECT COUNT(*) as total FROM food_stocks WHERE category_id = ? AND deleted_at IS NULL");
         mysqli_stmt_bind_param($check_usage, "i", $id);
         mysqli_stmt_execute($check_usage);
@@ -102,17 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Pagination
+
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Get Total Categories
+
 $count_result = mysqli_query($conn, "SELECT COUNT(*) as total FROM categories WHERE deleted_at IS NULL");
 $total_categories = mysqli_fetch_assoc($count_result)['total'];
 $total_pages = ceil($total_categories / $limit);
 
-// Get Categories with Pagination
+
 $categories = mysqli_query($conn, "SELECT c.*, 
     (SELECT COUNT(*) FROM food_stocks fs WHERE fs.category_id = c.id AND fs.deleted_at IS NULL) as food_count
     FROM categories c 
@@ -130,7 +130,7 @@ include '../includes/navbar_dashboard.php';
     <div class="flex flex-col w-full md:ml-64">
         <main class="flex-grow p-6">
             
-            <!-- Page Header -->
+         
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -147,7 +147,7 @@ include '../includes/navbar_dashboard.php';
                 </div>
             </div>
 
-            <!-- Alert Messages -->
+            
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
                     <div class="flex items-center">
@@ -169,7 +169,7 @@ include '../includes/navbar_dashboard.php';
             <?php endif; ?>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Add Category Form -->
+               
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">
                         <i class="fas fa-plus-circle mr-2 text-green-600"></i>Tambah Kategori
@@ -203,7 +203,7 @@ include '../includes/navbar_dashboard.php';
                     </form>
                 </div>
 
-                <!-- Categories List -->
+                
                 <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-gray-800">
@@ -254,7 +254,7 @@ include '../includes/navbar_dashboard.php';
                                 <?php endwhile; ?>
                             </div>
 
-                            <!-- Pagination -->
+                           
                             <?php if ($total_pages > 1): ?>
                             <div class="mt-6 flex items-center justify-between border-t pt-4">
                                 <div class="text-sm text-gray-700">
@@ -270,7 +270,7 @@ include '../includes/navbar_dashboard.php';
                                         </a>
                                     <?php endif; ?>
                                     
-                                    <!-- Page Numbers -->
+                                    
                                     <?php 
                                     $start_page = max(1, $page - 2);
                                     $end_page = min($total_pages, $page + 2);
@@ -312,7 +312,7 @@ include '../includes/navbar_dashboard.php';
     </div>
 </div>
 
-<!-- Edit Modal -->
+
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div class="flex items-center justify-between mb-4">
@@ -380,14 +380,14 @@ include '../includes/navbar_dashboard.php';
         document.getElementById('editModal').classList.add('hidden');
     }
 
-    // Close modal when clicking outside
+    
     document.getElementById('editModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeEditModal();
         }
     });
 
-    // Confirm delete with food count warning
+    
     function confirmDelete(foodCount) {
         if (foodCount > 0) {
             return confirm(`PERINGATAN: Kategori ini masih digunakan oleh ${foodCount} makanan!\n\nYakin ingin menghapus kategori ini?`);
@@ -395,20 +395,20 @@ include '../includes/navbar_dashboard.php';
         return confirm('Yakin ingin menghapus kategori ini?');
     }
 
-    // Auto-capitalize first letter of each word
+    
     function capitalizeWords(input) {
         return input.value.split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
     }
 
-    // Apply to add form
+  
     const namaKategoriInput = document.getElementById('nama_kategori');
     namaKategoriInput.addEventListener('blur', function() {
         this.value = capitalizeWords(this);
     });
 
-    // Apply to edit form
+    
     const editNamaInput = document.getElementById('edit_nama');
     editNamaInput.addEventListener('blur', function() {
         this.value = capitalizeWords(this);

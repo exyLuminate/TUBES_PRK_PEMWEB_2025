@@ -1,7 +1,6 @@
 <?php 
 session_start();
 
-// Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
     switch ($_SESSION['role']) {
         case 'admin':
@@ -140,28 +139,28 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
-        // XSS Protection: Sanitize input
+        
         function sanitizeInput(input) {
             const div = document.createElement('div');
             div.textContent = input;
             return div.innerHTML;
         }
 
-        // Get form elements
+        
         const form = document.getElementById('loginForm');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Sanitize username input in real-time
+       
         usernameInput.addEventListener('input', function(e) {
-            // Remove any HTML tags and scripts
+            
             let value = e.target.value;
             
-            // Remove < and > characters to prevent tag injection
+            
             value = value.replace(/[<>]/g, '');
             
-            // Limit to 50 characters
+            
             if (value.length > 50) {
                 value = value.substring(0, 50);
             }
@@ -169,27 +168,27 @@ if (isset($_SESSION['user_id'])) {
             e.target.value = value;
         });
 
-        // Prevent paste of malicious content in username
+       
         usernameInput.addEventListener('paste', function(e) {
             e.preventDefault();
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
             
-            // Remove HTML tags and scripts
+            
             const cleanedText = pastedText.replace(/[<>]/g, '').substring(0, 50);
             
-            // Insert cleaned text at cursor position
+           
             const start = this.selectionStart;
             const end = this.selectionEnd;
             const currentValue = this.value;
             
             this.value = currentValue.substring(0, start) + cleanedText + currentValue.substring(end);
             
-            // Set cursor position
+            
             const newPos = start + cleanedText.length;
             this.setSelectionRange(newPos, newPos);
         });
 
-        // Toggle password visibility
+        
         function togglePassword() {
             const field = document.getElementById('password');
             const icon = document.getElementById('toggleIcon');
@@ -205,12 +204,12 @@ if (isset($_SESSION['user_id'])) {
             }
         }
 
-        // Form submission validation
+      
         form.addEventListener('submit', function(e) {
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
             
-            // Validate username
+            
             if (username.length === 0) {
                 e.preventDefault();
                 alert('Username tidak boleh kosong');
@@ -218,7 +217,7 @@ if (isset($_SESSION['user_id'])) {
                 return false;
             }
 
-            // Check for potential XSS attempts
+            
             if (/<script|javascript:|onerror=|onload=/i.test(username)) {
                 e.preventDefault();
                 alert('Input tidak valid. Harap masukkan username yang benar.');
@@ -227,7 +226,7 @@ if (isset($_SESSION['user_id'])) {
                 return false;
             }
             
-            // Validate password
+            
             if (password.length === 0) {
                 e.preventDefault();
                 alert('Password tidak boleh kosong');
@@ -235,19 +234,18 @@ if (isset($_SESSION['user_id'])) {
                 return false;
             }
             
-            // Disable submit button to prevent double submission
+            
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             
             return true;
         });
 
-        // Prevent right-click on password field (optional security)
         passwordInput.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
 
-        // Clear form on page load (prevent autocomplete injection)
+       
         window.addEventListener('load', function() {
             form.reset();
         });

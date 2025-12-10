@@ -222,14 +222,14 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
-        // XSS Protection: Sanitize input
+        
         function sanitizeInput(input) {
             const div = document.createElement('div');
             div.textContent = input;
             return div.innerHTML;
         }
 
-        // Validate text (only letters and spaces)
+       
         function validateTextOnly(value, fieldName) {
             const textPattern = /^[a-zA-Z\s]+$/;
             
@@ -244,7 +244,7 @@ if (isset($_SESSION['user_id'])) {
             return null;
         }
 
-        // Username validation
+        
         const usernameInput = document.getElementById('username');
         const usernameError = document.getElementById('usernameError');
         const usernameErrorMsg = document.getElementById('usernameErrorMsg');
@@ -252,11 +252,11 @@ if (isset($_SESSION['user_id'])) {
         usernameInput.addEventListener('input', function(e) {
             let value = e.target.value;
             
-            // Remove any non-letter and non-space characters
+            
             value = value.replace(/[^a-zA-Z\s]/g, '');
             e.target.value = value;
             
-            // Validate
+            
             if (value.length > 0) {
                 const error = validateTextOnly(value, 'Username');
                 if (error) {
@@ -269,7 +269,7 @@ if (isset($_SESSION['user_id'])) {
             }
         });
 
-        // Nama Lengkap validation
+        
         const namaInput = document.getElementById('nama_lengkap');
         const namaError = document.getElementById('namaError');
         const namaErrorMsg = document.getElementById('namaErrorMsg');
@@ -277,11 +277,10 @@ if (isset($_SESSION['user_id'])) {
         namaInput.addEventListener('input', function(e) {
             let value = e.target.value;
             
-            // Remove any non-letter and non-space characters
+            
             value = value.replace(/[^a-zA-Z\s]/g, '');
             e.target.value = value;
-            
-            // Validate
+           
             if (value.length > 0) {
                 const error = validateTextOnly(value, 'Nama lengkap');
                 if (error) {
@@ -294,21 +293,21 @@ if (isset($_SESSION['user_id'])) {
             }
         });
 
-        // Phone validation
+        
         const phoneInput = document.getElementById('no_hp');
         const phoneError = document.getElementById('phoneError');
         const phoneErrorMsg = document.getElementById('phoneErrorMsg');
 
         phoneInput.addEventListener('input', function(e) {
-            // Remove non-numeric characters
+            
             let value = e.target.value.replace(/\D/g, '');
             
-            // Ensure starts with 0
+            
             if (value.length > 0 && value[0] !== '0') {
                 value = '0' + value;
             }
             
-            // Limit to 14 characters
+            
             if (value.length > 14) {
                 value = value.substring(0, 14);
             }
@@ -381,7 +380,7 @@ if (isset($_SESSION['user_id'])) {
             inputElement.classList.remove('border-red-500');
         }
 
-        // Toggle password visibility
+        
         function togglePassword(fieldId, iconId) {
             const field = document.getElementById(fieldId);
             const icon = document.getElementById(iconId);
@@ -397,7 +396,7 @@ if (isset($_SESSION['user_id'])) {
             }
         }
 
-        // Password match validation
+        
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm_password');
         const passwordMatch = document.getElementById('passwordMatch');
@@ -433,7 +432,7 @@ if (isset($_SESSION['user_id'])) {
         confirmPasswordInput.addEventListener('input', validatePasswordMatch);
         passwordInput.addEventListener('input', validatePasswordMatch);
 
-        // Form submission validation
+      
         const form = document.getElementById('registerForm');
         
         form.addEventListener('submit', function(e) {
@@ -445,7 +444,6 @@ if (isset($_SESSION['user_id'])) {
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
             
-            // Validate username
             const usernameError = validateTextOnly(username, 'Username');
             if (usernameError) {
                 showError(document.getElementById('usernameError'), usernameErrorMsg, usernameInput, usernameError);
@@ -453,7 +451,7 @@ if (isset($_SESSION['user_id'])) {
                 return false;
             }
             
-            // Validate nama lengkap
+            
             const namaError = validateTextOnly(namaLengkap, 'Nama lengkap');
             if (namaError) {
                 showError(document.getElementById('namaError'), namaErrorMsg, namaInput, namaError);
@@ -461,20 +459,20 @@ if (isset($_SESSION['user_id'])) {
                 return false;
             }
             
-            // Validate phone
+            
             if (!validatePhone(phoneValue)) {
                 phoneInput.focus();
                 return false;
             }
             
-            // Validate password match
+            
             if (password !== confirmPassword) {
                 showError(phoneError, phoneErrorMsg, confirmPasswordInput, 'Password tidak cocok!');
                 confirmPasswordInput.focus();
                 return false;
             }
             
-            // All validations passed, submit form
+            
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mendaftar...';
@@ -482,26 +480,26 @@ if (isset($_SESSION['user_id'])) {
             form.submit();
         });
 
-        // Prevent XSS on paste for text fields
+        
         [usernameInput, namaInput].forEach(input => {
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
                 const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                // Only allow letters and spaces
+                
                 const cleanedText = pastedText.replace(/[^a-zA-Z\s]/g, '');
                 
-                // Insert cleaned text at cursor position
+                
                 const start = this.selectionStart;
                 const end = this.selectionEnd;
                 const currentValue = this.value;
                 
                 this.value = currentValue.substring(0, start) + cleanedText + currentValue.substring(end);
                 
-                // Set cursor position
+                
                 const newPos = start + cleanedText.length;
                 this.setSelectionRange(newPos, newPos);
                 
-                // Trigger validation
+                
                 this.dispatchEvent(new Event('input'));
             });
         });
