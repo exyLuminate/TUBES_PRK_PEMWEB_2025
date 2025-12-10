@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id = (int)$_POST['user_id'];
         $action = $_POST['action'];
         
-        
+        // Cek agar admin tidak menghapus diri sendiri
         if ($user_id == $_SESSION['user_id']) {
             $_SESSION['error'] = 'Anda tidak dapat menonaktifkan akun sendiri!';
             header('Location: users_list.php');
@@ -23,17 +23,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($action === 'soft_delete') {
             
-            $stmt = mysqli_prepare($conn, "UPDATE users SET deleted_at = NOW(), is_active = 0 WHERE id = ?");
+            // --- PERBAIKAN DISINI ---
+            // Update username jadi "username_deleted_ID" agar username asli bisa dipakai lagi
+            $stmt = mysqli_prepare($conn, "UPDATE users SET deleted_at = NOW(), is_active = 0, username = CONCAT(username, '_deleted_', id) WHERE id = ?");
             mysqli_stmt_bind_param($stmt, "i", $user_id);
             
             if (mysqli_stmt_execute($stmt)) {
                 logActivity($conn, $_SESSION['user_id'], 'DELETE_USER', "Admin menghapus user ID: $user_id");
-                $_SESSION['success'] = 'User berhasil dihapus (soft delete)!';
+                $_SESSION['success'] = 'User berhasil dihapus (soft delete) dan username telah dibebaskan!';
             }
             mysqli_stmt_close($stmt);
+
         } 
         elseif ($action === 'toggle_active') {
-           
+            
             $stmt = mysqli_prepare($conn, "UPDATE users SET is_active = NOT is_active WHERE id = ?");
             mysqli_stmt_bind_param($stmt, "i", $user_id);
             
