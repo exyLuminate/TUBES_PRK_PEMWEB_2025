@@ -71,6 +71,3 @@ if ($update_stmt->execute()) {
     header("Location: ../donatur/manage_food.php?status=error&msg=" . urlencode($conn->error));
     exit();
 }
-
-$conn->close();
-?>

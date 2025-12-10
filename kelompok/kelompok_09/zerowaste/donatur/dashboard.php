@@ -8,7 +8,7 @@ if ($_SESSION['role'] !== 'donatur') {
 
 require_once '../config/database.php';
 
-require_once '../includes/auto_expire_foods.php';
+require_once '../actions/auto_expire_foods.php';
 
 $donatur_id = $_SESSION['user_id'];
 

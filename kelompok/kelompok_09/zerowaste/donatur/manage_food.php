@@ -14,6 +14,11 @@ if ($_SESSION['role'] !== 'donatur') {
 
 require_once '../config/database.php';
 
+require_once '../actions/auto_expire_foods.php';
+
+$donatur_id = (int)$_SESSION['user_id'];
+
+runAutoExpire($conn, $donatur_id);
 
 function e($str) {
     return htmlspecialchars($str ?? '', ENT_QUOTES, 'UTF-8');

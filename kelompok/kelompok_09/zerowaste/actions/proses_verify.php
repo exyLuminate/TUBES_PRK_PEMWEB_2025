@@ -99,6 +99,3 @@ try {
     header("Location: ../donatur/verify_claim.php?status=error&msg=" . urlencode($e->getMessage()));
     exit();
 }
-
-$conn->close();
-?>
